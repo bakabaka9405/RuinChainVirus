@@ -94,6 +94,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 				while (1) {
 					string ws = GetRandomPath();
 					ReleaseImage((ws + _T("\\TBL.jpg")).c_str());
+					Sleep(5);
 				}
 			}
 		}
