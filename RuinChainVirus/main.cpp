@@ -9,10 +9,10 @@
 //#include<iostream>
 using namespace std;
 void ReleaseImage(LPCTSTR path) {
-	if (auto rsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_IMG1), _T("img"))) {
-		if (auto global = LoadResource(NULL, rsrc)) {
-			if (auto lpvoid = LockResource(global)) {
-				if (auto size = SizeofResource(NULL, rsrc)) {
+	if (HRSRC rsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_IMG1), _T("img"))) {
+		if (HGLOBAL global = LoadResource(NULL, rsrc)) {
+			if (LPVOID lpvoid = LockResource(global)) {
+				if (DWORD size = SizeofResource(NULL, rsrc)) {
 					HANDLE hfile = CreateFile(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 					if (hfile != INVALID_HANDLE_VALUE) {
 						DWORD dwWritten = 0;
@@ -60,11 +60,12 @@ string GetRandomPath() {
 		}
 		if (!tmp.empty())
 			path = path.append(_T("\\")).append(tmp.at(rand() % tmp.size()));
+		_findclose(lf);
 	}
 	return path;
 }
-
 //int main(){
+TCHAR command[233];
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 	srand(unsigned(time(nullptr)));
 	if (MessageBox(NULL, _T("这是一个病毒（大概\r\n你确定要继续运行它吗？"), _T("警告"), MB_YESNO|MB_ICONERROR) == 6) {
@@ -80,7 +81,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, INT) {
 
 				STARTUPINFO info;
 				PROCESS_INFORMATION information;
-				TCHAR command[233];
+				
 				ZeroMemory(&info, sizeof info);
 				ZeroMemory(&information, sizeof information);
 				ZeroMemory(command, sizeof command);
